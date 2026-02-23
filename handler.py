@@ -10,6 +10,10 @@ import runpod
 
 SERVER_ADDRESS = "127.0.0.1"
 CLIENT_ID = str(uuid.uuid4())
+MIN_DURATION_SECONDS = 1
+MAX_DURATION_SECONDS = 190
+MIN_STEPS = 4
+MAX_STEPS = 8
 
 
 def post_json(url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -28,9 +32,12 @@ def get_json(url: str) -> Dict[str, Any]:
         return json.loads(resp.read())
 
 
-def queue_prompt(prompt: Dict[str, Any]) -> str:
+def queue_prompt(prompt: Dict[str, Any], extra_data: Dict[str, Any] | None = None) -> str:
     url = f"http://{SERVER_ADDRESS}:8188/prompt"
-    return post_json(url, {"prompt": prompt, "client_id": CLIENT_ID})["prompt_id"]
+    payload: Dict[str, Any] = {"prompt": prompt, "client_id": CLIENT_ID}
+    if extra_data:
+        payload["extra_data"] = extra_data
+    return post_json(url, payload)["prompt_id"]
 
 
 def wait_for_outputs(prompt_id: str, timeout_s: int = 3600) -> Dict[str, Any]:
@@ -49,6 +56,21 @@ def wait_for_outputs(prompt_id: str, timeout_s: int = 3600) -> Dict[str, Any]:
 def load_workflow() -> Dict[str, Any]:
     with open("/workflows/audio_trailer.json", "r", encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def clamp_int(value: int, min_value: int, max_value: int) -> int:
+    return max(min_value, min(max_value, value))
+
+
+def get_comfy_auth_extra_data() -> Dict[str, Any]:
+    data: Dict[str, Any] = {}
+    auth_token = os.getenv("COMFY_ORG_AUTH_TOKEN")
+    api_key = os.getenv("COMFY_API_KEY")
+    if auth_token:
+        data["auth_token_comfy_org"] = auth_token
+    if api_key:
+        data["api_key_comfy_org"] = api_key
+    return data
 
 
 def resolve_comfy_file(item: Dict[str, Any]) -> str:
@@ -114,17 +136,22 @@ def handler(job: Dict[str, Any]) -> Dict[str, Any]:
     if not prompt_text:
         return {"error": "input.prompt is required"}
 
-    seconds = float(inp.get("seconds", 30))
+    duration = clamp_int(int(round(float(inp.get("seconds", 30)))), MIN_DURATION_SECONDS, MAX_DURATION_SECONDS)
     seed = int(inp.get("seed", 42))
+    steps = clamp_int(int(inp.get("steps", 8)), MIN_STEPS, MAX_STEPS)
+    extra_data = get_comfy_auth_extra_data()
+    if not extra_data:
+        return {"error": "Set COMFY_API_KEY or COMFY_ORG_AUTH_TOKEN in the worker environment."}
 
     wf = load_workflow()
 
-    # Patch workflow nodes: prompt (6), duration (11), seed (3)
-    wf["6"]["inputs"]["text"] = prompt_text
-    wf["11"]["inputs"]["seconds"] = seconds
-    wf["3"]["inputs"]["seed"] = seed
+    # Patch StabilityTextToAudio node input values.
+    wf["1"]["inputs"]["prompt"] = prompt_text
+    wf["1"]["inputs"]["duration"] = duration
+    wf["1"]["inputs"]["seed"] = seed
+    wf["1"]["inputs"]["steps"] = steps
 
-    prompt_id = queue_prompt(wf)
+    prompt_id = queue_prompt(wf, extra_data=extra_data)
     history = wait_for_outputs(prompt_id)
     audio_path = find_audio_file(history)
 
