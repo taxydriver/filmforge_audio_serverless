@@ -17,12 +17,12 @@ RUN pip3 install -r /ComfyUI/requirements.txt
 
 # Download Stable Audio model
 RUN mkdir -p /ComfyUI/models/checkpoints
-RUN wget -q https://huggingface.co/stabilityai/stable-audio-open-1.0/resolve/main/stable-audio-open-1.0.safetensors \
+RUN wget -q "https://huggingface.co/Comfy-Org/stable-audio-open-1.0_repackaged/resolve/main/stable-audio-open-1.0.safetensors" \
     -O /ComfyUI/models/checkpoints/stable-audio-open-1.0.safetensors
 
 # Download T5 encoder
 RUN mkdir -p /ComfyUI/models/clip
-RUN wget -q https://huggingface.co/stabilityai/stable-audio-open-1.0/resolve/main/t5-base.safetensors \
+RUN wget -q "https://huggingface.co/ComfyUI-Wiki/t5-base/resolve/main/t5-base.safetensors" \
     -O /ComfyUI/models/clip/t5-base.safetensors
 
 COPY workflows /workflows

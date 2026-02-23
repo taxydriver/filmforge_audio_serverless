@@ -29,3 +29,11 @@ RunPod serverless worker for Stable Audio generation using ComfyUI.
 - `entrypoint.sh`
 - `handler.py`
 - `workflows/audio_trailer.json`
+
+## Build
+
+Build the worker image:
+
+```bash
+docker build -t filmforge-audio .
+```
