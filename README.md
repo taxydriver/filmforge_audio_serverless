@@ -1,6 +1,6 @@
 # filmforge_audio_serverless
 
-RunPod serverless worker for Stable Audio 2.5 generation using ComfyUI.
+RunPod serverless worker for Stable Audio generation using ComfyUI.
 
 ## Input
 
@@ -9,14 +9,10 @@ RunPod serverless worker for Stable Audio 2.5 generation using ComfyUI.
   "input": {
     "prompt": "cinematic emotional trailer score, no vocals",
     "seconds": 30,
-    "seed": 42,
-    "steps": 8
+    "seed": 42
   }
 }
 ```
-
-- `seconds`: clamped to `1..190`
-- `steps`: clamped to `4..8` (optional, default `8`)
 
 ## Output
 
@@ -41,10 +37,3 @@ Build the worker image:
 ```bash
 docker build -t filmforge-audio .
 ```
-
-## Runtime Env
-
-Stable Audio 2.5 in this worker uses Comfy API Nodes and requires one of:
-
-- `COMFY_API_KEY`
-- `COMFY_ORG_AUTH_TOKEN`
