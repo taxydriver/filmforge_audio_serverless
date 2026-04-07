@@ -2,8 +2,8 @@
   "3": {
     "inputs": {
       "seed": 586211343361376,
-      "steps": 100,
-      "cfg": 5.5,
+      "steps": 50,
+      "cfg": 4.98,
       "sampler_name": "dpmpp_3m_sde_gpu",
       "scheduler": "exponential",
       "denoise": 1,

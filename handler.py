@@ -116,7 +116,7 @@ def handler(job: Dict[str, Any]) -> Dict[str, Any]:
 
     seconds = float(inp.get("seconds", 30))
     seed = int(inp.get("seed", 42))
-    negative_text = inp.get("negative_prompt", "low quality, noise, distortion, clipping, static, hiss")
+    negative_text = inp.get("negative_prompt", "")
 
     wf = load_workflow()
 
