@@ -116,11 +116,13 @@ def handler(job: Dict[str, Any]) -> Dict[str, Any]:
 
     seconds = float(inp.get("seconds", 30))
     seed = int(inp.get("seed", 42))
+    negative_text = inp.get("negative_prompt", "low quality, noise, distortion, clipping, silence, static, hiss, muffled, amateur, lossy")
 
     wf = load_workflow()
 
-    # Patch workflow nodes: prompt (6), duration (11), seed (3)
+    # Patch workflow nodes: prompt (6), negative (7), duration (11), seed (3)
     wf["6"]["inputs"]["text"] = prompt_text
+    wf["7"]["inputs"]["text"] = negative_text
     wf["11"]["inputs"]["seconds"] = seconds
     wf["3"]["inputs"]["seed"] = seed
 
