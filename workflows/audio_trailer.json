@@ -4,7 +4,7 @@
       "seed": 586211343361376,
       "steps": 50,
       "cfg": 4.98,
-      "sampler_name": "dpmpp_3m_sde_gpu",
+      "sampler_name": "euler_ancestral",
       "scheduler": "exponential",
       "denoise": 1,
       "model": [
