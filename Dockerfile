@@ -7,12 +7,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --upgrade pip
+
+# Install PyTorch for CUDA 12.1 explicitly before anything else
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
 RUN pip3 install runpod websocket-client requests
 
 WORKDIR /
 
-# Install ComfyUI
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI
+# Install ComfyUI — pin to a stable release tag
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI && \
+    cd /ComfyUI && git checkout v0.3.40
 RUN pip3 install -r /ComfyUI/requirements.txt
 
 # Download Stable Audio model
